@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Zeleno · Produtos em Destaque</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Sora:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --green: #00543D;
+    --green-2: #0F4D26;
+    --mint: #29E681;
+    --off: #FDFAF2;
+    --ink: #101010;
+    --border: #e6e3da;
+    --muted: #6b7280;
+    --danger: #b91c1c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--off); color: var(--ink);
+    font-family: 'Poppins', system-ui, sans-serif; padding: 24px 16px 64px;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  header.top { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  header.top h1 { font-family: 'Sora', sans-serif; font-size: 22px; margin: 0; color: var(--green); }
+  .sub { color: var(--muted); font-size: 13px; margin: 0 0 20px; }
+  .card {
+    background: #fff; border: 1px solid var(--border); border-radius: 16px;
+    padding: 18px; margin-bottom: 18px;
+  }
+  .card h2 { font-family: 'Sora', sans-serif; font-size: 15px; margin: 0 0 14px; color: var(--green-2); }
+  label { display: block; font-size: 12px; font-weight: 600; color: #374151; margin: 12px 0 6px; }
+  input[type="text"], input[type="number"], input[type="password"], textarea, select {
+    width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: 10px;
+    font: inherit; font-size: 14px; background: #fff; color: var(--ink);
+  }
+  textarea { resize: vertical; min-height: 64px; }
+  input:focus, textarea:focus, select:focus { outline: 2px solid var(--mint); border-color: var(--green); }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .row > div { flex: 1; min-width: 130px; }
+  .btn {
+    appearance: none; border: 0; border-radius: 10px; padding: 11px 18px;
+    font: inherit; font-weight: 700; font-size: 14px; cursor: pointer;
+    background: var(--green); color: #fff; transition: filter .15s;
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn:disabled { opacity: .55; cursor: not-allowed; }
+  .btn.ghost { background: #fff; color: var(--green); border: 1px solid var(--border); }
+  .btn.danger { background: #fff; color: var(--danger); border: 1px solid #f0caca; }
+  .btn.small { padding: 7px 12px; font-size: 13px; }
+  .actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .msg { font-size: 13px; margin-top: 12px; min-height: 18px; }
+  .msg.ok { color: #0b6a4d; }
+  .msg.err { color: var(--danger); }
+  .preview {
+    width: 96px; height: 96px; border-radius: 50%; object-fit: cover;
+    border: 1px solid var(--border); background: #f3f4f6; display: block;
+  }
+  .uploader { display: flex; gap: 14px; align-items: center; }
+  .file-hint { font-size: 12px; color: var(--muted); }
+  ul.list { list-style: none; padding: 0; margin: 0; }
+  ul.list li {
+    display: flex; gap: 14px; align-items: center; padding: 12px 0;
+    border-top: 1px solid var(--border);
+  }
+  ul.list li:first-child { border-top: 0; }
+  .thumb { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); background: #f3f4f6; flex: none; }
+  .item-body { flex: 1; min-width: 0; }
+  .item-title { font-weight: 700; font-size: 14px; }
+  .item-text { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pill { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .pill.on { background: #e7f8ee; color: #0b6a4d; }
+  .pill.off { background: #f3f4f6; color: #6b7280; }
+  .item-actions { display: flex; gap: 8px; flex: none; }
+  .empty { color: var(--muted); font-size: 13px; padding: 8px 0; }
+  details.cfg summary { cursor: pointer; font-weight: 700; font-size: 13px; color: var(--green-2); }
+  .small-note { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .tabs { display: flex; gap: 8px; margin: 0 0 18px; }
+  .tab { appearance: none; border: 1px solid var(--border); background: #fff; color: var(--green-2); font: inherit; font-weight: 700; font-size: 13px; padding: 9px 16px; border-radius: 999px; cursor: pointer; }
+  .tab.active { background: var(--green); color: #fff; border-color: var(--green); }
+  .preview-wide { width: 100%; max-width: 420px; aspect-ratio: 16 / 6; object-fit: cover; border-radius: 12px; border: 1px solid var(--border); background: #f3f4f6; display: block; }
+  .thumb-wide { width: 120px; height: 48px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); background: #f3f4f6; flex: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Backoffice Zeleno</h1>
+    <a href="#" id="logoutLink" style="margin-left:auto;font-size:12px;color:var(--muted);text-decoration:none;display:none">trocar senha</a>
+  </header>
+  <p class="sub">Gerencie os destaques e os banners da loja. As mudanças vão para a planilha e a loja mostra em até 1 minuto.</p>
+
+  <div class="tabs">
+    <button class="tab active" id="tabDestaques" type="button">Destaques</button>
+    <button class="tab" id="tabBanners" type="button">Banners</button>
+  </div>
+
+  <div class="card" id="loginCard" style="display:none">
+    <h2>Entrar</h2>
+    <label>Senha</label>
+    <input type="password" id="loginSecret" placeholder="senha do backoffice" />
+    <div class="actions">
+      <button class="btn" id="loginBtn">Entrar</button>
+    </div>
+    <div class="msg" id="loginMsg"></div>
+  </div>
+
+  <div id="panelDestaques">
+  <div class="card">
+    <h2 id="formTitle">Novo destaque</h2>
+    <input type="hidden" id="fId" />
+    <div class="uploader">
+      <img class="preview" id="fPreview" alt="prévia" />
+      <div>
+        <label for="fImage" style="margin-top:0">Imagem</label>
+        <input type="file" id="fImage" accept="image/png,image/jpeg,image/webp" />
+        <div class="file-hint">Quadrada fica melhor (ela vira um círculo). Reduzimos automaticamente.</div>
+      </div>
+    </div>
+
+    <label>Título</label>
+    <input type="text" id="fTitulo" maxlength="60" placeholder="Ex.: Seleção premium" />
+
+    <label>Textinho (embaixo)</label>
+    <textarea id="fTexto" maxlength="160" placeholder="Ex.: Curadoria com presença forte e acabamento sofisticado."></textarea>
+
+    <div class="row">
+      <div>
+        <label>Ordem</label>
+        <input type="number" id="fOrdem" value="0" min="0" step="1" />
+      </div>
+      <div>
+        <label>Status</label>
+        <select id="fAtivo">
+          <option value="sim">Ativo (aparece na loja)</option>
+          <option value="nao">Inativo (escondido)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="btnSalvar">Salvar destaque</button>
+      <button class="btn ghost" id="btnLimpar">Limpar</button>
+    </div>
+    <div class="msg" id="formMsg"></div>
+  </div>
+
+  <div class="card">
+    <h2>Destaques atuais</h2>
+    <ul class="list" id="lista"></ul>
+    <div class="empty" id="listaVazia" style="display:none">Nenhum destaque cadastrado ainda.</div>
+    <div class="msg" id="listaMsg"></div>
+  </div>
+  </div><!-- /panelDestaques -->
+
+  <div id="panelBanners" style="display:none">
+    <div class="card">
+      <h2>Qual banner?</h2>
+      <div class="row">
+        <div>
+          <label>Público</label>
+          <select id="bPublico">
+            <option value="visitante">Visitante (quem não logou)</option>
+            <option value="logado">Logado</option>
+          </select>
+        </div>
+        <div>
+          <label>Idioma</label>
+          <select id="bIdioma">
+            <option value="pt">Português</option>
+            <option value="en">Inglês</option>
+          </select>
+        </div>
+        <div>
+          <label>Dispositivo</label>
+          <select id="bDispositivo">
+            <option value="desktop">Desktop (computador)</option>
+            <option value="mobile">Celular</option>
+          </select>
+        </div>
+      </div>
+      <div class="small-note" style="margin-top:8px">Escolha a combinação acima; abaixo aparecem os slides desse banner.</div>
+    </div>
+
+    <div class="card">
+      <h2 id="bFormTitle">Novo slide do banner</h2>
+      <input type="hidden" id="bId" />
+      <label style="margin-top:0">Imagem do banner</label>
+      <img class="preview-wide" id="bPreview" alt="prévia" />
+      <input type="file" id="bImage" accept="image/png,image/jpeg,image/webp" style="margin-top:10px" />
+      <div class="file-hint">Use a imagem larga (desktop) ou no formato de celular (mobile), conforme o tipo escolhido acima. Reduzimos automaticamente.</div>
+
+      <label>Texto alternativo (opcional)</label>
+      <input type="text" id="bAlt" maxlength="80" placeholder="Ex.: Promoção de óleos" />
+
+      <div class="row">
+        <div>
+          <label>Ordem</label>
+          <input type="number" id="bOrdem" value="0" min="0" step="1" />
+        </div>
+        <div>
+          <label>Status</label>
+          <select id="bAtivo">
+            <option value="sim">Ativo (aparece na loja)</option>
+            <option value="nao">Inativo (escondido)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="bBtnSalvar" type="button">Salvar slide</button>
+        <button class="btn ghost" id="bBtnLimpar" type="button">Limpar</button>
+      </div>
+      <div class="msg" id="bFormMsg"></div>
+    </div>
+
+    <div class="card">
+      <h2 id="bListaTitulo">Slides deste banner</h2>
+      <ul class="list" id="bLista"></ul>
+      <div class="empty" id="bListaVazia" style="display:none">Nenhum slide cadastrado nesta combinação ainda.</div>
+      <div class="msg" id="bListaMsg"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbzvSd2pproSrqI1LoYzCbHwyhgMg_9wTFnsl--hTcXUqwS9y98Ymr4wmpzzEYpwfRB-GQ/exec';
+  var LS_SECRET = 'zeleno_destaque_secret';
+
+  var els = {
+    loginCard: document.getElementById('loginCard'),
+    loginSecret: document.getElementById('loginSecret'),
+    loginBtn: document.getElementById('loginBtn'),
+    loginMsg: document.getElementById('loginMsg'),
+    logoutLink: document.getElementById('logoutLink'),
+    formTitle: document.getElementById('formTitle'),
+    fId: document.getElementById('fId'),
+    fImage: document.getElementById('fImage'),
+    fPreview: document.getElementById('fPreview'),
+    fTitulo: document.getElementById('fTitulo'),
+    fTexto: document.getElementById('fTexto'),
+    fOrdem: document.getElementById('fOrdem'),
+    fAtivo: document.getElementById('fAtivo'),
+    btnSalvar: document.getElementById('btnSalvar'),
+    btnLimpar: document.getElementById('btnLimpar'),
+    formMsg: document.getElementById('formMsg'),
+    lista: document.getElementById('lista'),
+    listaVazia: document.getElementById('listaVazia'),
+    listaMsg: document.getElementById('listaMsg')
+  };
+
+  var imagemBase64 = '';   // só preenchido quando o usuário escolhe um novo arquivo
+  var imagemMime = '';
+
+  function getUrl() { return WEBAPP_URL; }
+  function getSecret() { return (localStorage.getItem(LS_SECRET) || '').trim(); }
+
+  function mostrarLogin(mostrar) {
+    els.loginCard.style.display = mostrar ? 'block' : 'none';
+    if (els.logoutLink) els.logoutLink.style.display = mostrar ? 'none' : 'inline';
+    if (mostrar) els.loginSecret.focus();
+  }
+
+  function entrar() {
+    var s = els.loginSecret.value.trim();
+    if (!s) { msg(els.loginMsg, 'Digite a senha.', 'err'); return; }
+    localStorage.setItem(LS_SECRET, s);
+    els.loginSecret.value = '';
+    msg(els.loginMsg, '');
+    mostrarLogin(false);
+    listar();
+    listarBanners();
+  }
+
+  els.loginBtn.addEventListener('click', entrar);
+  els.loginSecret.addEventListener('keydown', function (e) { if (e.key === 'Enter') entrar(); });
+  if (els.logoutLink) {
+    els.logoutLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      localStorage.removeItem(LS_SECRET);
+      mostrarLogin(true);
+    });
+  }
+
+  function api(payload) {
+    var url = getUrl();
+    if (!url) return Promise.reject(new Error('Configure a URL do Web App.'));
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    }).then(function (r) { return r.json(); });
+  }
+
+  function escHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    });
+  }
+
+  // Lê a imagem, redimensiona para no máx. 900px e devolve base64 (JPEG).
+  function lerImagemRedimensionada(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        var img = new Image();
+        img.onload = function () {
+          var max = 900;
+          var w = img.width, h = img.height;
+          if (w > max || h > max) {
+            if (w >= h) { h = Math.round(h * max / w); w = max; }
+            else { w = Math.round(w * max / h); h = max; }
+          }
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          resolve({ dataUrl: dataUrl, base64: dataUrl.split(',')[1], mime: 'image/jpeg' });
+        };
+        img.onerror = function () { reject(new Error('Imagem inválida.')); };
+        img.src = reader.result;
+      };
+      reader.onerror = function () { reject(new Error('Falha ao ler o arquivo.')); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  els.fImage.addEventListener('change', function () {
+    var file = els.fImage.files && els.fImage.files[0];
+    if (!file) return;
+    lerImagemRedimensionada(file).then(function (out) {
+      imagemBase64 = out.base64;
+      imagemMime = out.mime;
+      els.fPreview.src = out.dataUrl;
+    }).catch(function (e) {
+      msg(els.formMsg, e.message || 'Erro na imagem.', 'err');
+    });
+  });
+
+  function msg(el, texto, tipo) {
+    el.textContent = texto || '';
+    el.className = 'msg' + (tipo ? ' ' + tipo : '');
+  }
+
+  function limparForm() {
+    els.fId.value = '';
+    els.fTitulo.value = '';
+    els.fTexto.value = '';
+    els.fOrdem.value = '0';
+    els.fAtivo.value = 'sim';
+    els.fImage.value = '';
+    els.fPreview.removeAttribute('src');
+    imagemBase64 = ''; imagemMime = '';
+    els.formTitle.textContent = 'Novo destaque';
+    msg(els.formMsg, '');
+  }
+
+  els.btnLimpar.addEventListener('click', limparForm);
+
+  els.btnSalvar.addEventListener('click', function () {
+    if (!getSecret()) { msg(els.formMsg, 'Faça login primeiro (senha).', 'err'); mostrarLogin(true); return; }
+    if (!els.fId.value && !imagemBase64) { msg(els.formMsg, 'Escolha uma imagem.', 'err'); return; }
+    if (!els.fTitulo.value.trim()) { msg(els.formMsg, 'Preencha o título.', 'err'); return; }
+
+    els.btnSalvar.disabled = true;
+    msg(els.formMsg, 'Salvando...', '');
+
+    var payload = {
+      action: 'salvarProdutoDestaque',
+      adminSecret: getSecret(),
+      id: els.fId.value || '',
+      titulo: els.fTitulo.value.trim(),
+      texto: els.fTexto.value.trim(),
+      ordem: els.fOrdem.value,
+      ativo: els.fAtivo.value
+    };
+    if (imagemBase64) { payload.imagemBase64 = imagemBase64; payload.mimeType = imagemMime; }
+
+    api(payload).then(function (res) {
+      els.btnSalvar.disabled = false;
+      if (res && res.success) {
+        msg(els.formMsg, 'Destaque salvo!', 'ok');
+        limparForm();
+        listar();
+      } else {
+        msg(els.formMsg, (res && res.message) || 'Não foi possível salvar.', 'err');
+      }
+    }).catch(function (e) {
+      els.btnSalvar.disabled = false;
+      msg(els.formMsg, e.message || 'Erro de conexão.', 'err');
+    });
+  });
+
+  function editar(p) {
+    els.fId.value = p.id;
+    els.fTitulo.value = p.titulo || '';
+    els.fTexto.value = p.texto || '';
+    els.fOrdem.value = p.ordem || 0;
+    els.fAtivo.value = (String(p.ativo).toLowerCase() === 'nao' || String(p.ativo).toLowerCase() === 'não') ? 'nao' : 'sim';
+    imagemBase64 = ''; imagemMime = ''; els.fImage.value = '';
+    if (p.imagem_url) els.fPreview.src = p.imagem_url; else els.fPreview.removeAttribute('src');
+    els.formTitle.textContent = 'Editar destaque';
+    msg(els.formMsg, 'Editando. Troque a imagem só se quiser (deixe em branco para manter).', '');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function excluir(p) {
+    if (!confirm('Excluir o destaque "' + (p.titulo || p.id) + '"?')) return;
+    msg(els.listaMsg, 'Excluindo...', '');
+    api({ action: 'excluirProdutoDestaque', adminSecret: getSecret(), id: p.id })
+      .then(function (res) {
+        if (res && res.success) { msg(els.listaMsg, ''); listar(); }
+        else msg(els.listaMsg, (res && res.message) || 'Não foi possível excluir.', 'err');
+      })
+      .catch(function (e) { msg(els.listaMsg, e.message || 'Erro de conexão.', 'err'); });
+  }
+
+  function renderLista(produtos) {
+    els.lista.innerHTML = '';
+    if (!produtos.length) { els.listaVazia.style.display = 'block'; return; }
+    els.listaVazia.style.display = 'none';
+
+    produtos.forEach(function (p) {
+      var li = document.createElement('li');
+      var ativo = !(String(p.ativo).toLowerCase() === 'nao' || String(p.ativo).toLowerCase() === 'não');
+      li.innerHTML =
+        '<img class="thumb" src="' + escHtml(p.imagem_url) + '" alt="">' +
+        '<div class="item-body">' +
+          '<div class="item-title">' + escHtml(p.titulo || '(sem título)') +
+            ' <span class="pill ' + (ativo ? 'on' : 'off') + '">' + (ativo ? 'ativo' : 'inativo') + '</span>' +
+          '</div>' +
+          '<div class="item-text">' + escHtml(p.texto || '') + '</div>' +
+        '</div>' +
+        '<div class="item-actions">' +
+          '<button class="btn ghost small" data-edit>Editar</button>' +
+          '<button class="btn danger small" data-del>Excluir</button>' +
+        '</div>';
+      li.querySelector('[data-edit]').addEventListener('click', function () { editar(p); });
+      li.querySelector('[data-del]').addEventListener('click', function () { excluir(p); });
+      els.lista.appendChild(li);
+    });
+  }
+
+  function listar() {
+    msg(els.listaMsg, 'Carregando...', '');
+    api({ action: 'getProdutosDestaque' })
+      .then(function (res) {
+        if (res && res.success) { renderLista(res.produtos || []); msg(els.listaMsg, ''); }
+        else msg(els.listaMsg, (res && res.message) || 'Não foi possível listar.', 'err');
+      })
+      .catch(function (e) { msg(els.listaMsg, e.message || 'Erro de conexão. Confira a URL e se o Web App está liberado para "qualquer pessoa".', 'err'); });
+  }
+
+  // ===== BANNERS =====
+  var bEls = {
+    publico: document.getElementById('bPublico'),
+    idioma: document.getElementById('bIdioma'),
+    dispositivo: document.getElementById('bDispositivo'),
+    formTitle: document.getElementById('bFormTitle'),
+    id: document.getElementById('bId'),
+    image: document.getElementById('bImage'),
+    preview: document.getElementById('bPreview'),
+    alt: document.getElementById('bAlt'),
+    ordem: document.getElementById('bOrdem'),
+    ativo: document.getElementById('bAtivo'),
+    btnSalvar: document.getElementById('bBtnSalvar'),
+    btnLimpar: document.getElementById('bBtnLimpar'),
+    formMsg: document.getElementById('bFormMsg'),
+    lista: document.getElementById('bLista'),
+    listaVazia: document.getElementById('bListaVazia'),
+    listaMsg: document.getElementById('bListaMsg'),
+    listaTitulo: document.getElementById('bListaTitulo')
+  };
+
+  var bannerBase64 = '';
+  var bannerMime = '';
+  var bannersTodos = [];
+
+  // Banner é largo: redimensiona para no máx. 1600px (mantendo proporção).
+  function lerImagemLarga(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        var img = new Image();
+        img.onload = function () {
+          var max = 1600;
+          var w = img.width, h = img.height;
+          if (w > max || h > max) {
+            if (w >= h) { h = Math.round(h * max / w); w = max; }
+            else { w = Math.round(w * max / h); h = max; }
+          }
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          resolve({ dataUrl: dataUrl, base64: dataUrl.split(',')[1], mime: 'image/jpeg' });
+        };
+        img.onerror = function () { reject(new Error('Imagem inválida.')); };
+        img.src = reader.result;
+      };
+      reader.onerror = function () { reject(new Error('Falha ao ler o arquivo.')); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  bEls.image.addEventListener('change', function () {
+    var file = bEls.image.files && bEls.image.files[0];
+    if (!file) return;
+    lerImagemLarga(file).then(function (out) {
+      bannerBase64 = out.base64; bannerMime = out.mime; bEls.preview.src = out.dataUrl;
+    }).catch(function (e) { msg(bEls.formMsg, e.message || 'Erro na imagem.', 'err'); });
+  });
+
+  function categoriaBanner() {
+    return { publico: bEls.publico.value, idioma: bEls.idioma.value, dispositivo: bEls.dispositivo.value };
+  }
+
+  function limparFormBanner() {
+    bEls.id.value = '';
+    bEls.alt.value = '';
+    bEls.ordem.value = '0';
+    bEls.ativo.value = 'sim';
+    bEls.image.value = '';
+    bEls.preview.removeAttribute('src');
+    bannerBase64 = ''; bannerMime = '';
+    bEls.formTitle.textContent = 'Novo slide do banner';
+    msg(bEls.formMsg, '');
+  }
+
+  bEls.btnLimpar.addEventListener('click', limparFormBanner);
+
+  [bEls.publico, bEls.idioma, bEls.dispositivo].forEach(function (sel) {
+    sel.addEventListener('change', function () { limparFormBanner(); renderListaBanners(); });
+  });
+
+  bEls.btnSalvar.addEventListener('click', function () {
+    if (!getSecret()) { msg(bEls.formMsg, 'Faça login primeiro (senha).', 'err'); mostrarLogin(true); return; }
+    if (!bEls.id.value && !bannerBase64) { msg(bEls.formMsg, 'Escolha uma imagem.', 'err'); return; }
+
+    var cat = categoriaBanner();
+    bEls.btnSalvar.disabled = true;
+    msg(bEls.formMsg, 'Salvando...', '');
+
+    var payload = {
+      action: 'salvarBanner',
+      adminSecret: getSecret(),
+      id: bEls.id.value || '',
+      publico: cat.publico,
+      idioma: cat.idioma,
+      dispositivo: cat.dispositivo,
+      alt: bEls.alt.value.trim(),
+      ordem: bEls.ordem.value,
+      ativo: bEls.ativo.value
+    };
+    if (bannerBase64) { payload.imagemBase64 = bannerBase64; payload.mimeType = bannerMime; }
+
+    api(payload).then(function (res) {
+      bEls.btnSalvar.disabled = false;
+      if (res && res.success) { msg(bEls.formMsg, 'Banner salvo!', 'ok'); limparFormBanner(); listarBanners(); }
+      else msg(bEls.formMsg, (res && res.message) || 'Não foi possível salvar.', 'err');
+    }).catch(function (e) { bEls.btnSalvar.disabled = false; msg(bEls.formMsg, e.message || 'Erro de conexão.', 'err'); });
+  });
+
+  function editarBanner(b) {
+    bEls.id.value = b.id;
+    bEls.publico.value = b.publico || 'visitante';
+    bEls.idioma.value = b.idioma || 'pt';
+    bEls.dispositivo.value = b.dispositivo || 'desktop';
+    bEls.alt.value = b.alt || '';
+    bEls.ordem.value = b.ordem || 0;
+    bEls.ativo.value = (String(b.ativo).toLowerCase() === 'nao' || String(b.ativo).toLowerCase() === 'não') ? 'nao' : 'sim';
+    bannerBase64 = ''; bannerMime = ''; bEls.image.value = '';
+    if (b.imagem_url) bEls.preview.src = b.imagem_url; else bEls.preview.removeAttribute('src');
+    bEls.formTitle.textContent = 'Editar slide do banner';
+    msg(bEls.formMsg, 'Editando. Troque a imagem só se quiser (deixe em branco para manter).', '');
+    renderListaBanners();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function excluirBannerItem(b) {
+    if (!confirm('Excluir este slide do banner?')) return;
+    msg(bEls.listaMsg, 'Excluindo...', '');
+    api({ action: 'excluirBanner', adminSecret: getSecret(), id: b.id })
+      .then(function (res) {
+        if (res && res.success) { msg(bEls.listaMsg, ''); listarBanners(); }
+        else msg(bEls.listaMsg, (res && res.message) || 'Não foi possível excluir.', 'err');
+      })
+      .catch(function (e) { msg(bEls.listaMsg, e.message || 'Erro de conexão.', 'err'); });
+  }
+
+  function renderListaBanners() {
+    var cat = categoriaBanner();
+    var rotPub = bEls.publico.options[bEls.publico.selectedIndex].text;
+    var rotIdi = bEls.idioma.options[bEls.idioma.selectedIndex].text;
+    var rotDis = bEls.dispositivo.options[bEls.dispositivo.selectedIndex].text;
+    bEls.listaTitulo.textContent = 'Slides: ' + rotPub + ' · ' + rotIdi + ' · ' + rotDis;
+
+    var itens = bannersTodos.filter(function (b) {
+      return b.publico === cat.publico && b.idioma === cat.idioma && b.dispositivo === cat.dispositivo;
+    }).sort(function (a, b) { return (a.ordem || 0) - (b.ordem || 0); });
+
+    bEls.lista.innerHTML = '';
+    if (!itens.length) { bEls.listaVazia.style.display = 'block'; return; }
+    bEls.listaVazia.style.display = 'none';
+
+    itens.forEach(function (b) {
+      var li = document.createElement('li');
+      var ativo = !(String(b.ativo).toLowerCase() === 'nao' || String(b.ativo).toLowerCase() === 'não');
+      li.innerHTML =
+        '<img class="thumb-wide" src="' + escHtml(b.imagem_url) + '" alt="">' +
+        '<div class="item-body">' +
+          '<div class="item-title">Ordem ' + (Number(b.ordem) || 0) +
+            ' <span class="pill ' + (ativo ? 'on' : 'off') + '">' + (ativo ? 'ativo' : 'inativo') + '</span></div>' +
+          '<div class="item-text">' + escHtml(b.alt || '') + '</div>' +
+        '</div>' +
+        '<div class="item-actions">' +
+          '<button class="btn ghost small" data-edit>Editar</button>' +
+          '<button class="btn danger small" data-del>Excluir</button>' +
+        '</div>';
+      li.querySelector('[data-edit]').addEventListener('click', function () { editarBanner(b); });
+      li.querySelector('[data-del]').addEventListener('click', function () { excluirBannerItem(b); });
+      bEls.lista.appendChild(li);
+    });
+  }
+
+  function listarBanners() {
+    msg(bEls.listaMsg, 'Carregando...', '');
+    api({ action: 'getBanners' })
+      .then(function (res) {
+        if (res && res.success) { bannersTodos = res.banners || []; renderListaBanners(); msg(bEls.listaMsg, ''); }
+        else msg(bEls.listaMsg, (res && res.message) || 'Não foi possível listar.', 'err');
+      })
+      .catch(function (e) { msg(bEls.listaMsg, e.message || 'Erro de conexão.', 'err'); });
+  }
+
+  // ===== ABAS =====
+  var tabDestaques = document.getElementById('tabDestaques');
+  var tabBanners = document.getElementById('tabBanners');
+  var panelDestaques = document.getElementById('panelDestaques');
+  var panelBanners = document.getElementById('panelBanners');
+
+  tabDestaques.addEventListener('click', function () {
+    tabDestaques.classList.add('active'); tabBanners.classList.remove('active');
+    panelDestaques.style.display = ''; panelBanners.style.display = 'none';
+  });
+  tabBanners.addEventListener('click', function () {
+    tabBanners.classList.add('active'); tabDestaques.classList.remove('active');
+    panelBanners.style.display = ''; panelDestaques.style.display = 'none';
+  });
+
+  mostrarLogin(!getSecret());
+  listar();
+  listarBanners();
+</script>
+</body>
+</html>
