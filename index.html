@@ -336,6 +336,22 @@
     *, *::before, *::after { animation: none !important; transition: none !important; }
   }
 </style>
+<style>
+  /* ===== LOGIN (mesmo visual do backoffice de descontos) ===== */
+  .zlogin-overlay { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center;
+    font-family:'Poppins',sans-serif; background:linear-gradient(135deg,#013A2A,#00543D); padding:20px; }
+  .zlogin-card { background:#FDFAF2; width:100%; max-width:380px; border-radius:18px; padding:34px 30px;
+    box-shadow:0 24px 60px rgba(0,0,0,.28); }
+  .zlogin-logo { text-align:center; font-weight:900; font-size:24px; color:#00543D; letter-spacing:.5px; }
+  .zlogin-sub { text-align:center; color:#5b6b63; font-size:13px; margin:4px 0 24px; }
+  .zlogin-card label { display:block; font-size:12px; font-weight:600; color:#013A2A; margin:14px 0 6px; }
+  .zlogin-card input { width:100%; padding:12px 14px; border:1px solid #d7ddd9; border-radius:10px; font-size:14px;
+    font-family:inherit; outline:none; }
+  .zlogin-card input:focus { border-color:#00543D; box-shadow:0 0 0 3px rgba(0,84,61,.12); }
+  .zlogin-btn { width:100%; margin-top:22px; padding:13px; border:none; border-radius:10px; cursor:pointer;
+    background:#00543D; color:#fff; font-weight:700; font-size:15px; font-family:inherit; }
+  .zlogin-btn:hover { background:#013A2A; }
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -362,24 +378,25 @@
   </header>
   <p class="sub">Gerencie os destaques e banners. O que você publica aqui aparece na loja em até 1 minuto.</p>
 
-  <div class="tabs">
+  <div class="tabs" style="display:none">
     <button class="tab active" id="tabDestaques" type="button">Destaques</button>
     <button class="tab" id="tabBanners" type="button">Banners</button>
   </div>
 
-  <div class="card" id="loginCard" style="display:none">
-    <h2>Entrar</h2>
-    <label>Email</label>
-    <input type="email" id="loginEmail" placeholder="seuemail@zelenomeds.com" autocomplete="username" />
-    <label>Senha</label>
-    <input type="password" id="loginSecret" placeholder="sua senha" autocomplete="current-password" />
-    <div class="actions">
-      <button class="btn" id="loginBtn">Entrar</button>
+  <div class="zlogin-overlay" id="loginCard" style="display:none">
+    <div class="zlogin-card">
+      <div class="zlogin-logo">ZELENO</div>
+      <div class="zlogin-sub">Backoffice de Banners e Destaques</div>
+      <label for="loginEmail">Email</label>
+      <input type="email" id="loginEmail" placeholder="seuemail@zelenomeds.com" autocomplete="username" />
+      <label for="loginSecret">Senha</label>
+      <input type="password" id="loginSecret" placeholder="Sua senha" autocomplete="current-password" />
+      <div class="msg" id="loginMsg"></div>
+      <button class="zlogin-btn" id="loginBtn" type="button">Entrar</button>
     </div>
-    <div class="msg" id="loginMsg"></div>
   </div>
 
-  <div id="panelDestaques">
+  <div id="panelDestaques" style="display:none">
   <div class="card">
     <h2 id="formTitle">Novo destaque</h2>
     <input type="hidden" id="fId" />
@@ -567,8 +584,24 @@
   function getSecret() { return (localStorage.getItem(LS_SECRET) || '').trim(); }
 
   function mostrarLogin(mostrar) {
-    els.loginCard.style.display = mostrar ? 'block' : 'none';
+    els.loginCard.style.display = mostrar ? 'flex' : 'none';
     if (els.logoutLink) els.logoutLink.style.display = mostrar ? 'none' : 'inline';
+    // Enquanto nao logado, esconde TODO o painel (abas + destaques + banners).
+    var _tabs = document.querySelector('.tabs');
+    var _pd = document.getElementById('panelDestaques');
+    var _pb = document.getElementById('panelBanners');
+    if (_tabs) _tabs.style.display = mostrar ? 'none' : '';
+    if (mostrar) {
+      if (_pd) _pd.style.display = 'none';
+      if (_pb) _pb.style.display = 'none';
+    } else {
+      if (_pd) _pd.style.display = '';
+      if (_pb) _pb.style.display = 'none';
+      var _td = document.getElementById('tabDestaques');
+      var _tb = document.getElementById('tabBanners');
+      if (_td) _td.classList.add('active');
+      if (_tb) _tb.classList.remove('active');
+    }
     if (mostrar && els.loginEmail) els.loginEmail.focus();
   }
 
