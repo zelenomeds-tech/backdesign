@@ -369,8 +369,10 @@
 
   <div class="card" id="loginCard" style="display:none">
     <h2>Entrar</h2>
+    <label>Email</label>
+    <input type="email" id="loginEmail" placeholder="seuemail@zelenomeds.com" autocomplete="username" />
     <label>Senha</label>
-    <input type="password" id="loginSecret" placeholder="senha do backoffice" />
+    <input type="password" id="loginSecret" placeholder="sua senha" autocomplete="current-password" />
     <div class="actions">
       <button class="btn" id="loginBtn">Entrar</button>
     </div>
@@ -499,8 +501,45 @@
   var WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbzvSd2pproSrqI1LoYzCbHwyhgMg_9wTFnsl--hTcXUqwS9y98Ymr4wmpzzEYpwfRB-GQ/exec';
   var LS_SECRET = 'zeleno_destaque_secret';
 
+  // ⬇️⬇️ COLE AQUI O SEGREDO ATUAL DO BACKOFFICE (o mesmo que voces digitavam antes).
+  //          Sem ele, salvar/excluir nao funciona. Cole entre as aspas abaixo:
+  var ADMIN_SECRET = '';
+  // ⬆️⬆️ -----------------------------------------------------------------------
+
+  // Usuarios do painel. Senha em PBKDF2 (sem texto puro). Login roda no navegador.
+  var PBKDF2_ITER = 100000;
+  var BACKOFFICE_USERS = [
+    { email: "victor.santiago@zelenomeds.com", salt: "0ce4287c63bded9a8afce2eaaa288e0d", hash: "10bae25bb3e6d2c48eab5f76361d01f840124db390d3a6e5370666dfe70ce8e4" },
+    { email: "emily.barreto@zelenomeds.com", salt: "1b2ad0b3e1ade47c9c7e14cd0de2e165", hash: "fc0cc1ca3747f61aac6e46775473db4a830c64e24a1d92a18ccb0d6e92f9be6a" },
+    { email: "mauricio.cabral@zelenomeds.com", salt: "62d07b979eb5b2a876604cba8a3cc42b", hash: "b80eeb915980baf2573cd757d999a2e9580a51bf0dfdc148c2e7fd9f3f3532f0" },
+    { email: "natan.batista@zelenomeds.com", salt: "8278e91235d2dd5fb0d56f876637ea0e", hash: "b5a8659437c89629763fd63e414762d69e5703b8d13812640b615ef2fbfc3c8b" },
+    { email: "luana.ereio@zelenomeds.com", salt: "9039ba6e449e44b7196cf3290e188a33", hash: "515acbb2f71c1e5ec75ca28c6ac5de80d9eb779dafe8c5714bb54deb08b92d08" },
+    { email: "carlos.jeronymo@zelenomeds.com", salt: "4f7e6da1ffdbabec5970201065f147c2", hash: "680d218e30c590942bb9f3fc6328812723971e3cbe3305308d901acdccdc6d8b" },
+    { email: "laysla@zelenomeds.com", salt: "45de8c390ff0f40eca71ee2ed50385ae", hash: "4f6ef3aad8690a39e5465ededb70e347bbbf813beb58f7661f7cf3b9f388a6e9" },
+    { email: "roberta.pinheiro@zelenomeds.com", salt: "8f706748da4d65f26944411e9343cea1", hash: "eb714a9bd1ea8dacbfc560ec5637a39b7d5c8610a8789fd6f258a53b6f391c12" }
+  ];
+
+  function hexParaBytes(hex) {
+    var arr = new Uint8Array(hex.length / 2);
+    for (var i = 0; i < arr.length; i++) arr[i] = parseInt(hex.substr(i * 2, 2), 16);
+    return arr;
+  }
+  function bytesParaHex(buf) {
+    var b = new Uint8Array(buf), s = "";
+    for (var i = 0; i < b.length; i++) s += b[i].toString(16).padStart(2, "0");
+    return s;
+  }
+  async function senhaConfere(senha, saltHex, hashHex) {
+    try {
+      var km = await crypto.subtle.importKey('raw', new TextEncoder().encode(senha), 'PBKDF2', false, ['deriveBits']);
+      var bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: hexParaBytes(saltHex), iterations: PBKDF2_ITER, hash: 'SHA-256' }, km, 256);
+      return bytesParaHex(bits) === hashHex;
+    } catch (e) { return false; }
+  }
+
   var els = {
     loginCard: document.getElementById('loginCard'),
+    loginEmail: document.getElementById('loginEmail'),
     loginSecret: document.getElementById('loginSecret'),
     loginBtn: document.getElementById('loginBtn'),
     loginMsg: document.getElementById('loginMsg'),
@@ -530,13 +569,19 @@
   function mostrarLogin(mostrar) {
     els.loginCard.style.display = mostrar ? 'block' : 'none';
     if (els.logoutLink) els.logoutLink.style.display = mostrar ? 'none' : 'inline';
-    if (mostrar) els.loginSecret.focus();
+    if (mostrar && els.loginEmail) els.loginEmail.focus();
   }
 
-  function entrar() {
-    var s = els.loginSecret.value.trim();
-    if (!s) { msg(els.loginMsg, 'Digite a senha.', 'err'); return; }
-    localStorage.setItem(LS_SECRET, s);
+  async function entrar() {
+    var email = ((els.loginEmail && els.loginEmail.value) || '').trim().toLowerCase();
+    var senha = els.loginSecret.value;
+    if (!email || !senha) { msg(els.loginMsg, 'Preencha email e senha.', 'err'); return; }
+    var user = null;
+    for (var i = 0; i < BACKOFFICE_USERS.length; i++) { if (BACKOFFICE_USERS[i].email === email) { user = BACKOFFICE_USERS[i]; break; } }
+    var ok = user ? await senhaConfere(senha, user.salt, user.hash) : false;
+    if (!ok) { msg(els.loginMsg, 'Email ou senha invalidos.', 'err'); return; }
+    if (!ADMIN_SECRET) { msg(els.loginMsg, 'Falta configurar o segredo do backoffice no codigo (ADMIN_SECRET).', 'err'); return; }
+    localStorage.setItem(LS_SECRET, ADMIN_SECRET);
     els.loginSecret.value = '';
     msg(els.loginMsg, '');
     mostrarLogin(false);
